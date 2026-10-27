@@ -28,7 +28,7 @@ Open http://localhost:4200. There is no backend yet: product data lives in a ser
 1. Feature-based application architecture
 2. Core, Shared and Feature areas
 3. Smart vs presentational components
-4. Reusable components and services
+4. Reusable components, services and pipes
 5. Environment configuration
 
 ## Agenda
@@ -38,10 +38,10 @@ Open http://localhost:4200. There is no backend yet: product data lives in a ser
 | 0:00 – 0:10 | Opening: why structure matters |
 | 0:10 – 0:30 | 1 + 2. Feature-based architecture: core / shared / features |
 | 0:30 – 0:50 | 3. Smart vs presentational components |
-| 0:50 – 1:05 | 4. Reusable components and services |
-| 1:05 – 1:15 | 5. Environment configuration |
-| 1:15 – 1:25 | Break |
-| 1:25 – 1:55 | **Lab:** build this project from `ng new` |
+| 0:50 – 1:10 | 4. Reusable components, services and pipes |
+| 1:10 – 1:20 | 5. Environment configuration |
+| 1:20 – 1:30 | Break |
+| 1:30 – 1:55 | **Lab:** build this project from `ng new` |
 | 1:55 – 2:00 | Takeaways + homework |
 
 ---
@@ -64,11 +64,14 @@ src/app/
 │   ├── notifications/           toast messages
 │   └── config.ts                API_URL token (read from the environment)
 ├── shared/                      reusable, NO business logic
-│   └── ui/                      page header, loading / error / empty states
+│   ├── ui/                      page header, loading / error / empty states
+│   └── pipes/                   generic pipes (truncate)
 └── features/                    one folder per business area, lazy loaded
     ├── dashboard/
+    ├── pipes-demo/              teaching page for pipes
     └── products/
         ├── data/                model + ProductService
+        ├── pipes/               product pipes (stockLabel)
         ├── pages/               SMART: product-list.page.ts
         ├── components/          PRESENTATIONAL: product-table.ts
         └── products.routes.ts
@@ -108,7 +111,7 @@ src/app/
 
 ---
 
-## 4. Reusable components and services (15 min)
+## 4. Reusable components, services and pipes (20 min)
 
 | Piece | File | Used by |
 |-------|------|---------|
@@ -120,6 +123,36 @@ src/app/
 **Teach:** reusable means no hidden dependencies. Data comes in through inputs or method parameters, and results go out through outputs or return values.
 
 **Show:** click **Details** on a product. The toast comes from a core service the page injected.
+
+### Pipes (open the Pipes page)
+
+A pipe formats a value in the template. The data itself doesn't change.
+
+```html
+{{ price | currency: 'INR' }}           built in, with an argument
+{{ name | slice: 0 : 3 | uppercase }}   chained
+{{ title | truncate: 15 }}              custom
+```
+
+```ts
+@Pipe({ name: 'truncate' })
+export class TruncatePipe implements PipeTransform {
+  transform(value: string, max = 20) { ... }
+}
+```
+
+| Pipe | Folder | Why |
+|------|--------|-----|
+| `date`, `currency`, `uppercase`... | built in | import from `@angular/common` |
+| `truncate` | `shared/pipes/` | generic, knows nothing about products |
+| `stockLabel` | `features/products/pipes/` | has a products rule: low stock means under 5 |
+
+**Show:**
+1. On the Pipes page, move the sliders. The output changes, but the original value doesn't.
+2. Open Products: the **Availability** column uses the same `stockLabel` pipe, so the rule lives in one place.
+3. Every pipe must be listed in the component's `imports`.
+
+**Ask:** "Where would an `initials` pipe go (`Arjun Mehta` to `AM`)?" (`shared/pipes/`) "And an `orderStatus` pipe?" (`features/orders/pipes/`)
 
 ---
 
@@ -141,7 +174,7 @@ src/environments/environment.development.ts  → development (npm start)
 
 ---
 
-## Lab: build this project from `ng new` (30 min)
+## Lab: build this project from `ng new` (25 min)
 
 ```bash
 ng new my-product-manager --style=scss --ssr=false
@@ -154,7 +187,8 @@ ng new my-product-manager --style=scss --ssr=false
 5. `features/products/data/product.service.ts`: a private `signal` with products, a public read-only signal, and a `lowStock` computed.
 6. `components/product-table.ts` (presentational): `input()` products, `output()` select.
 7. `pages/product-list.page.ts` (smart): inject the service, pass data to the table, handle `select`.
-8. Routes: Shell with lazy `dashboard` and `products` children.
+8. `features/products/pipes/stock-label.pipe.ts`, used in a new Availability column in the table.
+9. Routes: Shell with lazy `dashboard` and `products` children.
 
 **Done when:** your app looks and behaves like this project.
 
@@ -165,7 +199,8 @@ ng new my-product-manager --style=scss --ssr=false
 1. Organise **by feature**: core = once, shared = generic, features = business areas.
 2. Pages are **smart**, and the pieces inside them are **presentational**.
 3. Reusable means no hidden dependencies: inputs in, outputs out.
-4. Environment files hold config, never secrets.
+4. Pipes format values in templates. Generic ones go in `shared/`, rule-based ones stay in their feature.
+5. Environment files hold config, never secrets.
 
 ## Homework
 

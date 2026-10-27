@@ -13,6 +13,7 @@ import { environment } from '../../../environments/environment';
       <nav>
         <a routerLink="/dashboard" routerLinkActive="active">Dashboard</a>
         <a routerLink="/products" routerLinkActive="active">Products</a>
+        <a routerLink="/pipes" routerLinkActive="active">Pipes</a>
       </nav>
       <span class="spacer"></span>
       <span class="muted">{{ production ? 'production build' : 'development build' }}</span>

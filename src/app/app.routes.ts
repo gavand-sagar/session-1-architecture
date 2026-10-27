@@ -13,6 +13,7 @@ export const routes: Routes = [
       { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
       { path: 'dashboard', title: 'Dashboard', loadComponent: () => import('./features/dashboard/dashboard.page') },
       { path: 'products', loadChildren: () => import('./features/products/products.routes') },
+      { path: 'pipes', title: 'Pipes', loadComponent: () => import('./features/pipes-demo/pipes-demo.page') },
     ],
   },
   { path: '**', redirectTo: '' },
