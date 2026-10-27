@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BookNest - prototype</title>
+<style>
+  body { margin: 0; font-family: Arial, Helvetica, sans-serif; font-size: 15px; color: #222; background: #f4f4f4; }
+  a { color: #2a5db0; }
+  header { background: #2d3e50; color: #fff; padding: 10px 20px; display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+  header .logo { font-weight: bold; font-size: 18px; }
+  header .env { background: #e67e22; font-size: 11px; padding: 2px 6px; border-radius: 3px; }
+  header nav a { color: #dfe6ee; text-decoration: none; margin-right: 12px; }
+  header nav a.active { color: #fff; border-bottom: 2px solid #fff; padding-bottom: 2px; }
+  header .right { margin-left: auto; display: flex; gap: 14px; align-items: center; font-size: 14px; }
+  header .overdue { background: #c0392b; padding: 3px 8px; border-radius: 10px; }
+  .wrap { max-width: 980px; margin: 20px auto; padding: 0 15px; }
+  .screen { display: none; }
+  .screen.show { display: block; }
+  h1 { font-size: 22px; margin: 0 0 15px; }
+  h3 { margin: 0 0 10px; font-size: 16px; }
+  .top { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+  .crumb { font-size: 13px; margin-bottom: 8px; color: #777; }
+  .box { background: #fff; border: 1px solid #ddd; border-radius: 4px; padding: 15px; margin-bottom: 15px; }
+  .stats { display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 15px; }
+  .stats .box { flex: 1; min-width: 150px; margin: 0; }
+  .stats .num { font-size: 26px; font-weight: bold; margin-top: 5px; }
+  .cols { display: flex; gap: 15px; flex-wrap: wrap; }
+  .cols > .box { flex: 1; min-width: 280px; }
+  table { width: 100%; border-collapse: collapse; background: #fff; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid #e5e5e5; }
+  th { background: #fafafa; font-size: 13px; color: #555; }
+  .tag { font-size: 12px; padding: 2px 8px; border-radius: 10px; white-space: nowrap; }
+  .available { background: #d4f4dd; color: #1e6b34; }
+  .onloan { background: #fff1cc; color: #8a6100; }
+  .overdue-tag { background: #fbd5d5; color: #9b1c1c; }
+  .returned { background: #e8e8e8; color: #555; }
+  .btn { display: inline-block; padding: 6px 12px; border: 1px solid #bbb; background: #fff; border-radius: 3px; cursor: pointer; text-decoration: none; color: #222; font-size: 14px; }
+  .btn.blue { background: #2a5db0; color: #fff; border-color: #2a5db0; }
+  .btn.sm { padding: 3px 8px; font-size: 13px; }
+  .btn[disabled] { opacity: .5; cursor: default; }
+  input, select { padding: 6px 8px; border: 1px solid #bbb; border-radius: 3px; font-size: 14px; }
+  .filters { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+  .filters input { flex: 1; min-width: 200px; }
+  .form { max-width: 450px; }
+  .form label { display: block; margin: 12px 0 4px; font-size: 14px; }
+  .form select, .form input { width: 100%; box-sizing: border-box; }
+  .err { color: #c0392b; font-size: 13px; margin-top: 3px; }
+  .ini { display: inline-block; width: 30px; height: 30px; line-height: 30px; text-align: center; border-radius: 50%; background: #d6e0f0; color: #2d3e50; font-size: 12px; font-weight: bold; margin-right: 6px; }
+  .ini.big { width: 52px; height: 52px; line-height: 52px; font-size: 18px; vertical-align: middle; }
+  .members { display: flex; gap: 15px; flex-wrap: wrap; }
+  .members a { flex: 1; min-width: 200px; text-decoration: none; color: inherit; }
+  .members .box { margin: 0; }
+  .cover { height: 140px; background: #e3e7ee; color: #888; display: flex; align-items: center; justify-content: center; font-size: 13px; margin-bottom: 10px; }
+  .row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #f0f0f0; }
+  .muted { color: #777; font-size: 13px; }
+  .dev { font-size: 13px; color: #666; border-top: 1px dashed #ccc; margin-top: 18px; padding-top: 8px; }
+  .dev b { color: #444; }
+  pre { background: #fff; border: 1px solid #ddd; padding: 12px; overflow: auto; font-size: 12px; }
+</style>
+</head>
+<body>
+
+<header>
+  <span class="logo">BookNest</span>
+  <span class="env">DEV</span>
+  <nav>
+    <a href="#dashboard" data-nav="dashboard">Dashboard</a>
+    <a href="#books" data-nav="book">Books</a>
+    <a href="#members" data-nav="member">Members</a>
+  </nav>
+  <div class="right">
+    <span class="overdue">Overdue: 2</span>
+    <span>Priya (librarian)</span>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- dashboard -->
+  <div class="screen" id="dashboard">
+    <div class="top"><h1>Dashboard</h1><a class="btn blue" href="#lend">Lend a book</a></div>
+    <div class="stats">
+      <div class="box">Total books<div class="num">8</div></div>
+      <div class="box">On loan<div class="num">4</div></div>
+      <div class="box">Overdue<div class="num" style="color:#c0392b">2</div></div>
+      <div class="box">Members<div class="num">5</div></div>
+    </div>
+    <div class="box">
+      <h3>Recent loans</h3>
+      <table>
+        <tr><th>Book</th><th>Member</th><th>Due</th><th>Status</th></tr>
+        <tr><td><a href="#book">Clean Code</a></td><td><a href="#member">Arjun Mehta</a></td><td>12 Oct</td><td><span class="tag overdue-tag">Overdue</span></td></tr>
+        <tr><td>The Pragmatic Programmer</td><td>Sara Khan</td><td>15 Oct</td><td><span class="tag overdue-tag">Overdue</span></td></tr>
+        <tr><td>Atomic Habits</td><td>Arjun Mehta</td><td>2 Nov</td><td><span class="tag onloan">On loan</span></td></tr>
+        <tr><td>Sapiens</td><td>Neha Rao</td><td>5 Nov</td><td><span class="tag onloan">On loan</span></td></tr>
+      </table>
+    </div>
+    <p class="dev"><b>Dev notes:</b> "On loan" count includes overdue ones. All numbers come from the loans data, nothing is hardcoded.</p>
+  </div>
+
+  <!-- books -->
+  <div class="screen" id="books">
+    <div class="top"><h1>Books</h1><span class="muted">8 books</span></div>
+    <div class="filters">
+      <input placeholder="Search title or author">
+      <select><option>All genres</option><option>Programming</option><option>Self-help</option><option>History</option><option>Fiction</option></select>
+      <select><option>Any status</option><option>Available</option><option>On loan</option><option>Overdue</option></select>
+    </div>
+    <table>
+      <tr><th>Title</th><th>Author</th><th>Genre</th><th>Status</th><th></th></tr>
+      <tr><td>Clean Code</td><td>Robert C. Martin</td><td>Programming</td><td><span class="tag overdue-tag">Overdue</span></td><td><a class="btn sm" href="#book">View</a></td></tr>
+      <tr><td>Refactoring</td><td>Martin Fowler</td><td>Programming</td><td><span class="tag available">Available</span></td><td><a class="btn sm" href="#book">View</a></td></tr>
+      <tr><td>The Pragmatic Programmer</td><td>Hunt &amp; Thomas</td><td>Programming</td><td><span class="tag overdue-tag">Overdue</span></td><td><a class="btn sm" href="#book">View</a></td></tr>
+      <tr><td>Atomic Habits</td><td>James Clear</td><td>Self-help</td><td><span class="tag onloan">On loan</span></td><td><a class="btn sm" href="#book">View</a></td></tr>
+      <tr><td>Deep Work</td><td>Cal Newport</td><td>Self-help</td><td><span class="tag available">Available</span></td><td><a class="btn sm" href="#book">View</a></td></tr>
+      <tr><td>Sapiens</td><td>Yuval Noah Harari</td><td>History</td><td><span class="tag onloan">On loan</span></td><td><a class="btn sm" href="#book">View</a></td></tr>
+      <tr><td>The Silk Roads</td><td>Peter Frankopan</td><td>History</td><td><span class="tag available">Available</span></td><td><a class="btn sm" href="#book">View</a></td></tr>
+      <tr><td>The Alchemist</td><td>Paulo Coelho</td><td>Fiction</td><td><span class="tag available">Available</span></td><td><a class="btn sm" href="#book">View</a></td></tr>
+    </table>
+    <p class="dev"><b>Dev notes:</b> if nothing matches the search show "No books found" with a clear filters button.</p>
+  </div>
+
+  <!-- book detail -->
+  <div class="screen" id="book">
+    <div class="crumb"><a href="#books">Books</a> / Refactoring</div>
+    <div class="top"><h1>Refactoring</h1><a class="btn blue" href="#lend">Lend this book</a></div>
+    <div class="cols">
+      <div class="box">
+        <div class="cover">cover</div>
+        <div class="row"><span class="muted">Author</span><span>Martin Fowler</span></div>
+        <div class="row"><span class="muted">Genre</span><span>Programming</span></div>
+        <div class="row"><span class="muted">ISBN</span><span>978-0134757599</span></div>
+        <div class="row"><span class="muted">Status</span><span class="tag available">Available</span></div>
+      </div>
+      <div class="box">
+        <h3>Loan history</h3>
+        <div class="row"><span><span class="ini">SK</span>Sara Khan</span><span class="muted">1 Sep - 14 Sep</span><span class="tag returned">Returned</span></div>
+        <div class="row"><span><span class="ini">AM</span>Arjun Mehta</span><span class="muted">2 Aug - 20 Aug</span><span class="tag returned">Returned</span></div>
+      </div>
+    </div>
+    <p class="dev"><b>Dev notes:</b> lend button disabled when the book is on loan or overdue.</p>
+  </div>
+
+  <!-- lend -->
+  <div class="screen" id="lend">
+    <div class="crumb"><a href="#dashboard">Dashboard</a> / Lend a book</div>
+    <h1>Lend a book</h1>
+    <div class="box form">
+      <label>Book</label>
+      <select><option>Refactoring</option><option>Deep Work</option><option>The Silk Roads</option><option>The Alchemist</option></select>
+      <label>Member</label>
+      <select><option>-- select member --</option><option>Arjun Mehta</option><option>Sara Khan</option><option>Neha Rao</option><option>Vikram Joshi</option><option>Leela Iyer</option></select>
+      <div class="err">Select a member</div>
+      <label>Due date</label>
+      <input type="date" value="2026-11-10">
+      <div style="margin-top:18px;text-align:right">
+        <a class="btn" href="#dashboard">Cancel</a>
+        <a class="btn blue" href="#member">Save</a>
+      </div>
+    </div>
+    <p class="dev"><b>Dev notes:</b> only available books in the list. Due date defaults to today + 14 days, can't be in the past. After save show a small success message and open the member page.</p>
+  </div>
+
+  <!-- members -->
+  <div class="screen" id="members">
+    <div class="top"><h1>Members</h1><span class="muted">5 members</span></div>
+    <div class="filters"><input placeholder="Search members"></div>
+    <div class="members">
+      <a href="#member"><div class="box"><span class="ini">AM</span><b>Arjun Mehta</b><p class="muted">2 books on loan</p><span class="tag overdue-tag">1 overdue</span></div></a>
+      <a href="#member"><div class="box"><span class="ini">SK</span><b>Sara Khan</b><p class="muted">1 book on loan</p><span class="tag overdue-tag">1 overdue</span></div></a>
+      <a href="#member"><div class="box"><span class="ini">NR</span><b>Neha Rao</b><p class="muted">1 book on loan</p><span class="tag available">On time</span></div></a>
+      <a href="#member"><div class="box"><span class="ini">VJ</span><b>Vikram Joshi</b><p class="muted">No books</p></div></a>
+      <a href="#member"><div class="box"><span class="ini">LI</span><b>Leela Iyer</b><p class="muted">No books</p></div></a>
+    </div>
+  </div>
+
+  <!-- member detail -->
+  <div class="screen" id="member">
+    <div class="crumb"><a href="#members">Members</a> / Arjun Mehta</div>
+    <div class="top"><h1><span class="ini big">AM</span> Arjun Mehta</h1><span class="muted">arjun@mail.test, member since 2024</span></div>
+    <div class="box">
+      <h3>Current loans</h3>
+      <table>
+        <tr><th>Book</th><th>Due</th><th>Status</th><th></th></tr>
+        <tr><td>Clean Code</td><td>12 Oct</td><td><span class="tag overdue-tag">Overdue</span></td><td><button class="btn sm">Return</button></td></tr>
+        <tr><td>Atomic Habits</td><td>2 Nov</td><td><span class="tag onloan">On loan</span></td><td><button class="btn sm">Return</button></td></tr>
+      </table>
+    </div>
+    <p class="dev"><b>Dev notes:</b> on return remove the row, book becomes available again and the overdue count in the header updates.</p>
+  </div>
+
+  <!-- sample data -->
+  <div class="screen" id="data">
+    <h1>Sample data</h1>
+    <p class="muted">Copy this into your project. "today" is fixed so everyone gets the same statuses.</p>
+    <pre id="json"></pre>
+  </div>
+
+  <p class="muted" style="margin-top:30px">Prototype only. Screens: <a href="#dashboard">dashboard</a>, <a href="#books">books</a>, <a href="#book">book</a>, <a href="#lend">lend</a>, <a href="#members">members</a>, <a href="#member">member</a>, <a href="#data">sample data</a></p>
+</div>
+
+<script type="application/json" id="sample">
+{
+  "today": "2026-10-27",
+  "books": [
+    { "id": 1, "title": "Clean Code", "author": "Robert C. Martin", "genre": "Programming", "isbn": "978-0132350884" },
+    { "id": 2, "title": "Refactoring", "author": "Martin Fowler", "genre": "Programming", "isbn": "978-0134757599" },
+    { "id": 3, "title": "The Pragmatic Programmer", "author": "Hunt & Thomas", "genre": "Programming", "isbn": "978-0135957059" },
+    { "id": 4, "title": "Atomic Habits", "author": "James Clear", "genre": "Self-help", "isbn": "978-0735211292" },
+    { "id": 5, "title": "Deep Work", "author": "Cal Newport", "genre": "Self-help", "isbn": "978-1455586691" },
+    { "id": 6, "title": "Sapiens", "author": "Yuval Noah Harari", "genre": "History", "isbn": "978-0062316097" },
+    { "id": 7, "title": "The Silk Roads", "author": "Peter Frankopan", "genre": "History", "isbn": "978-1101912379" },
+    { "id": 8, "title": "The Alchemist", "author": "Paulo Coelho", "genre": "Fiction", "isbn": "978-0062315007" }
+  ],
+  "members": [
+    { "id": 1, "name": "Arjun Mehta", "email": "arjun@mail.test", "since": 2024 },
+    { "id": 2, "name": "Sara Khan", "email": "sara@mail.test", "since": 2023 },
+    { "id": 3, "name": "Neha Rao", "email": "neha@mail.test", "since": 2025 },
+    { "id": 4, "name": "Vikram Joshi", "email": "vikram@mail.test", "since": 2022 },
+    { "id": 5, "name": "Leela Iyer", "email": "leela@mail.test", "since": 2026 }
+  ],
+  "loans": [
+    { "id": 1, "bookId": 1, "memberId": 1, "from": "2026-09-28", "due": "2026-10-12", "returned": null },
+    { "id": 2, "bookId": 3, "memberId": 2, "from": "2026-10-01", "due": "2026-10-15", "returned": null },
+    { "id": 3, "bookId": 4, "memberId": 1, "from": "2026-10-19", "due": "2026-11-02", "returned": null },
+    { "id": 4, "bookId": 6, "memberId": 3, "from": "2026-10-22", "due": "2026-11-05", "returned": null },
+    { "id": 5, "bookId": 2, "memberId": 2, "from": "2026-09-01", "due": "2026-09-15", "returned": "2026-09-14" },
+    { "id": 6, "bookId": 2, "memberId": 1, "from": "2026-08-02", "due": "2026-08-16", "returned": "2026-08-20" }
+  ]
+}
+</script>
+
+<script>
+  document.getElementById('json').textContent = document.getElementById('sample').textContent.trim();
+
+  function show() {
+    var id = location.hash.replace('#', '') || 'dashboard';
+    document.querySelectorAll('.screen').forEach(function (s) { s.classList.toggle('show', s.id === id); });
+    document.querySelectorAll('header nav a').forEach(function (a) { a.classList.toggle('active', id.indexOf(a.dataset.nav) === 0); });
+    window.scrollTo(0, 0);
+  }
+  window.addEventListener('hashchange', show);
+  show();
+</script>
+</body>
+</html>
